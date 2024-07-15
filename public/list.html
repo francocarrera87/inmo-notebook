@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Propiedades Inmobiliarias</title>
+    <style>
+        body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #eaf2f8;
+    color: #333;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+h1, h2 {
+    text-align: center;
+    color: #2c3e50;
+    font-weight: 700;
+}
+.list-container {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+}
+.property-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    justify-content: center;
+}
+.property {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+.property:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+.property img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+.property h3 {
+    font-size: 1.6em;
+    margin: 0.5em 0;
+    color: #2980b9;
+}
+.property p {
+    margin: 0.4em 0;
+    display: flex;
+    align-items: center;
+}
+.property .price {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 1.5em;
+    margin-top: 10px;
+}
+.property .details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+.status {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+.status-venta {
+    background-color: #fdebd0;
+    color: #e67e22;
+}
+.status-alquiler {
+    background-color: #d4efdf;
+    color: #27ae60;
+}
+.fa-solid {
+    margin-right: 8px;
+    color: #3498db;
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="list-container">
+        <h2>Lista de Propiedades</h2>
+        <div class="property-list" id="propertyList">
+            <!-- Propiedades serán agregadas aquí -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función para obtener y mostrar las propiedades
+    async function fetchProperties() {
+        try {
+            const response = await fetch('http://localhost:3000/inmobiliaria');
+            const properties = await response.json();
+            const propertyList = document.getElementById('propertyList');
+            propertyList.innerHTML = ''; // Limpiar la lista actual
+
+            properties.forEach(property => {
+                const propertyDiv = document.createElement('div');
+                propertyDiv.className = 'property';
+
+                const propertyStatus = property.modo === 'venta' ? 'En Venta' : 'En Alquiler';
+                const statusClass = property.modo === 'venta' ? 'status-venta' : 'status-alquiler';
+
+                propertyDiv.innerHTML = `
+                    <h2>${property.nombre}</h2>
+                    <div>
+                        ${property.imagenes.map(imagen => `<img src="${imagen}" alt="Imagen de la propiedad">`).join('')}
+                    </div>
+                    <p class="status ${statusClass}">${propertyStatus}</p>
+                    <p class="price">$${property.precio.toLocaleString()} ${property.moneda}</p>
+                    <p><strong>Descripción:</strong> ${property.descripcion}</p>
+                    <div class="details">
+                        <p><strong>Metros Cuadrados:</strong> ${property.metrosCuadrados} m²</p>
+                        <p><strong>Baños:</strong> ${property.banos}</p>
+                        <p><strong>Habitaciones:</strong> ${property.habitaciones}</p>
+                        <p><strong>Garajes:</strong> ${property.garajes}</p>
+                        <p><strong>Pisos:</strong> ${property.pisos}</p>
+                    </div>
+                    
+                `;
+
+                propertyList.appendChild(propertyDiv);
+            });
+        } catch (error) {
+            console.error('Error al obtener las propiedades:', error);
+            alert('Error al cargar las propiedades. Por favor, intente de nuevo más tarde.');
+        }
+    }
+
+    // Cargar las propiedades al iniciar la página
+    fetchProperties();
+</script>
+</body>
+</html>

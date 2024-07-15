@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Propiedades Inmobiliarias</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #f7f9fc;
+            color: #333;
+            padding: 0 15%;
+        }
+
+        .container-wrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            width: 48%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: auto;
+            justify-content: center;
+        }
+
+        input,
+        textarea {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid #bdc3c7;
+            border-radius: 10px;
+            transition: border-color 0.3s ease;
+            background-color: #ecf0f1;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        input[type="submit"],
+        button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        input[type="submit"]:hover,
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .switch {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .switch-label {
+            margin-right: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .switch input + label {
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+            background-color: #bdc3c7;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .switch input:checked + label {
+            background-color: #3498db;
+        }
+
+        .switch input + label:before {
+            content: "";
+            display: block;
+            width: 25px;
+            height: 25px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2.5px;
+            left: 2.5px;
+            transition: transform 0.3s;
+        }
+
+        .switch input:checked + label:before {
+            transform: translateX(30px);
+        }
+
+        .switch-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .switch-group span {
+            margin-left: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        #propertiesList {
+            margin-top: 20px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .property-card {
+            display: flex;
+            align-items: stretch;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .property-venta {
+            border-left: 5px solid #2ecc71;
+        }
+
+        .property-alquiler {
+            border-left: 5px solid #3498db;
+        }
+
+        .property-details {
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .property-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .property-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .property-info {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .property-description {
+            font-size: 12px;
+            color: #34495e;
+            margin-top: 8px;
+            min-height: 50px;
+        }
+
+        .property-mode {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .mode-venta {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .mode-alquiler {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .property-actions {
+            margin-top: 10px;
+        }
+
+        .property-actions button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-button {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background-color: #d35400;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .no-image {
+            width: 100px;
+            height: 100px;
+            background-color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+
+        #searchBox {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #bdc3c7;
+            border-radius: 10px;
+            transition: border-color 0.3s ease;
+            background-color: #ecf0f1;
+        }
+
+        #searchBox:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        .pagination button:hover {
+            background-color: #2980b9;
+        }
+
+        .pagination button[disabled] {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translateX(100%);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #2ecc71;
+        }
+
+        .notification.error {
+            background-color: #e74c3c;
+        }
+
+        .whatsapp-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25D366;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, box-shadow 0.3s, width 0.3s, border-radius 0.3s;
+            overflow: hidden;
+        }
+        
+        .whatsapp-button a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: width 0.3s;
+            height: 100%;
+            padding: 0 5px;
+            box-sizing: border-box;
+        }
+        
+        .whatsapp-button img {
+            width: 30px;
+            height: 30px;
+            display: block;
+            margin: 0;
+            transition: margin-right 0.3s;
+        }
+        
+        .whatsapp-button span {
+            display: none;
+            margin-left: 10px;
+        }
+        
+        .whatsapp-button:hover {
+            background-color: #128C7E;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            width: 250px;
+            border-radius: 24px;
+        }
+        
+        .whatsapp-button:hover a {
+            justify-content: flex-start;
+        }
+        
+        .whatsapp-button:hover span {
+            display: inline;
+        }
+
+        /* Media queries */
+        @media (max-width: 1200px) {
+            body {
+                padding: 0 10%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0 5%;
+            }
+            
+            .container-wrapper {
+                flex-direction: column;
+            }
+
+            .container {
+                width: 100%;
+                height: auto;
+            }
+
+            .property-card {
+                flex-direction: row;
+            }
+
+            .property-image {
+                width: 100px;
+                height: 100px;
+                margin-left: auto;
+            }
+
+            .whatsapp-button {
+                width: 40px;
+                height: 40px;
+            }
+
+            .whatsapp-button img {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0 2%;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            input,
+            textarea,
+            #searchBox {
+                font-size: 14px;
+            }
+
+            .property-title {
+                font-size: 14px;
+            }
+
+            .property-info,
+            .property-description {
+                font-size: 10px;
+            }
+
+            .property-mode {
+                font-size: 8px;
+            }
+
+            .pagination button {
+                font-size: 14px;
+            }
+
+            .notification {
+                width: 90%;
+                right: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="whatsapp-button">
+        <a href="https://wa.me/qr/VX2YR7U3ITV6P1" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+            <span>Contactar con Soporte</span>
+        </a>
+    </div>
+    <div class="container-wrapper">
+        <div class="container">
+            <h2>Crear/Editar Propiedad</h2>
+            <form id="propertyForm">
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre de la Propiedad" required>
+                
+                <div class="switch-group">
+                    <span class="switch-label">Modo:</span>
+                    <div class="switch">
+                        <input type="radio" id="venta" name="modo" value="venta" checked>
+                        <label for="venta"></label>
+                        <span>Venta</span>
+                    </div>
+                    <div class="switch">
+                        <input type="radio" id="alquiler" name="modo" value="alquiler">
+                        <label for="alquiler"></label>
+                        <span>Alquiler</span>
+                    </div>
+                </div>
+                
+                <input type="number" id="precio" name="precio" placeholder="Valor" required min="1000" max="10000000">
+                
+                <div class="switch-group">
+                    <span class="switch-label">Moneda:</span>
+                    <div class="switch">
+                        <input type="radio" id="ars" name="moneda" value="ARS" checked>
+                        <label for="ars"></label>
+                        <span>ARS</span>
+                    </div>
+                    <div class="switch">
+                        <input type="radio" id="usd" name="moneda" value="USD">
+                        <label for="usd"></label>
+                        <span>USD</span>
+                    </div>
+                </div>
+                <input type="text" id="ciudad" name="ciudad" placeholder="Ciudad" required> <!-- Nuevo input -->
+                <input type="number" id="metrosTotales" name="metrosTotales" placeholder="Metros Totales" required min="1"> <!-- Nuevo input -->
+                <input type="number" id="metrosCuadrados" name="metrosCuadrados" placeholder="M2 Contruidos" required min="0" max="20000">
+                <input type="number" id="banos" name="banos" placeholder="Cantidad de Baños" required min="0">
+                <input type="number" id="habitaciones" name="habitaciones" placeholder="Cantidad de Habitaciones" required min="0">
+                <input type="number" id="garajes" name="garajes" placeholder="Cantidad de Garajes" required min="0">
+                <input type="number" id="pisos" name="pisos" placeholder="Cantidad de Pisos" required min="0">
+                <textarea id="descripcion" name="descripcion" placeholder="Descripción" rows="3" required></textarea>
+                <input type="file" id="imagenes" name="imagenes" multiple accept="image/*" required>
+                <input type="submit" id="submitBtn" value="Guardar Propiedad">
+            </form>
+        </div>
+        <div class="container">
+            <h2>Listado de Propiedades</h2>
+            <input type="text" id="searchBox" placeholder="Buscar propiedad..." oninput="filterProperties()">
+            <div id="propertiesList"></div>
+            <div class="pagination">
+                <button id="prevPage" onclick="changePage(-1)">Anterior</button>
+                <button id="nextPage" onclick="changePage(1)">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        let properties = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchProperties();
+            document.getElementById("propertyForm").addEventListener("submit", handleSubmit);
+        });
+
+        async function fetchProperties() {
+            try {
+                const response = await fetch("http://localhost:3000/inmobiliaria");
+                properties = await response.json();
+                displayProperties(properties, currentPage);
+                updatePagination();
+            } catch (error) {
+                console.error("Error fetching properties:", error);
+                showNotification("Error al cargar las propiedades. Por favor, intente de nuevo más tarde.", "error");
+            }
+        }
+
+        function displayProperties(propertiesArray, page) {
+            const list = document.getElementById("propertiesList");
+            list.innerHTML = "";
+
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedProperties = propertiesArray.slice(start, end);
+
+            list.innerHTML = paginatedProperties.map(
+                (property) => `
+                    <div class="property-card ${property.modo === 'venta' ? 'property-venta' : 'property-alquiler'}">
+                        <div class="property-details">
+                            <strong>${property.nombre}</strong> - ${property.modo === 'venta' ? '<span class="mode-venta">Venta</span>' : '<span class="mode-alquiler">Alquiler</span>'} - $${property.precio} ${property.moneda}
+                            <p>${property.descripcion}</p>
+                            <p>Metros Totales: ${property.metrosTotales}</p> <!-- Mostrar el nuevo campo -->
+                            <p>Ciudad: ${property.ciudad}</p> <!-- Mostrar el nuevo campo -->
+                            <div class="property-actions">
+                                <button onclick="editProperty('${property._id}')">Editar</button>
+                                <button class="delete-button" onclick="confirmDeleteProperty('${property._id}')">Eliminar</button>
+                            </div>
+                        </div>
+                        ${property.imagenes && property.imagenes.length > 0 
+                          ? `<img src="${property.imagenes[0]}" alt="${property.nombre}" class="property-image">`
+                          : `<div class="no-image">Sin imagen</div>`}
+                    </div>
+                `).join("");
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(properties.length / itemsPerPage);
+            document.getElementById("prevPage").disabled = currentPage === 1;
+            document.getElementById("nextPage").disabled = currentPage === totalPages;
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            displayProperties(properties, currentPage);
+            updatePagination();
+        }
+
+        async function editProperty(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/inmobiliaria/${id}`);
+                const property = await response.json();
+
+                document.getElementById("nombre").value = property.nombre;
+                document.getElementById("venta").checked = property.modo === 'venta';
+                document.getElementById("alquiler").checked = property.modo === 'alquiler';
+                document.getElementById("precio").value = property.precio;
+                document.getElementById("ars").checked = property.moneda === 'ARS';
+                document.getElementById("usd").checked = property.moneda === 'USD';
+                document.getElementById("descripcion").value = property.descripcion;
+                document.getElementById("metrosCuadrados").value = property.metrosCuadrados;
+                document.getElementById("banos").value = property.banos;
+                document.getElementById("habitaciones").value = property.habitaciones;
+                document.getElementById("garajes").value = property.garajes;
+                document.getElementById("pisos").value = property.pisos;
+                document.getElementById("metrosTotales").value = property.metrosTotales; // Nuevo campo
+                document.getElementById("ciudad").value = property.ciudad; // Nuevo campo
+
+                document.getElementById("propertyForm").dataset.id = property._id;
+                document.getElementById("submitBtn").value = "Actualizar Propiedad";
+                document.getElementById("imagenes").required = false;
+            } catch (error) {
+                showNotification("Error al cargar la propiedad para editar: " + error.message, "error");
+            }
+        }
+
+        async function confirmDeleteProperty(id) {
+            showNotification("¿Estás seguro de querer eliminar esta propiedad? <button onclick='deleteProperty(\"" + id + "\")'>Sí</button> <button onclick='hideNotification()'>No</button>", "confirm");
+        }
+
+        async function deleteProperty(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/inmobiliaria/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    showNotification("Propiedad eliminada.", "success");
+                    fetchProperties();
+                } else {
+                    showNotification("Error al eliminar la propiedad.", "error");
+                }
+            } catch (error) {
+                showNotification("Error al eliminar la propiedad: " + error.message, "error");
+            }
+        }
+
+        function filterProperties() {
+            const searchTerm = document.getElementById("searchBox").value.toLowerCase();
+            const filteredProperties = properties.filter(
+                (property) =>
+                    property.nombre.toLowerCase().includes(searchTerm) ||
+                    property.descripcion.toLowerCase().includes(searchTerm)
+            );
+            displayProperties(filteredProperties, currentPage);
+            updatePagination();
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const id = form.dataset.id;
+
+            const formData = new FormData(form);
+            const url = id ? `http://localhost:3000/inmobiliaria/${id}` : "http://localhost:3000/inmobiliaria";
+            const method = id ? "PUT" : "POST";
+
+            try {
+                const response = await fetch(url, { method: method, body: formData });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification(id ? "Propiedad actualizada." : "Propiedad creada.", "success");
+                    fetchProperties();
+                    form.reset();
+                    form.removeAttribute("data-id");
+                    document.getElementById("submitBtn").value = "Guardar Propiedad";
+                    document.getElementById("imagenes").required = true;
+                } else {
+                    const errorData = await response.json();
+                    showNotification("Error: " + errorData.message, "error");
+                }
+            } catch (error) {
+                showNotification("Error: " + error.message, "error");
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById("notification");
+            notification.innerHTML = message;
+            notification.className = `notification show ${type}`;
+            if (type !== "confirm") {
+                setTimeout(() => {
+                    notification.className = "notification";
+                }, 3000);
+            }
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById("notification");
+            notification.className = "notification";
+        }
+    </script>
+</body>
+</html>
