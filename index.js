@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const session = require('express-session');
 require('dotenv').config();
 const path = require('path');
 
@@ -14,28 +15,40 @@ mongoose.connect(MONGODB_URI, {
 .then(() => console.log('Conexión establecida con MongoDB.'))
 .catch(err => console.error('Error de conexión a MongoDB:', err));
 
-app.use(express.json()); // Middleware para parsear JSON
-app.use(express.urlencoded({ extended: true })); // Middleware para parsear datos de formularios
-app.use(express.static(path.join(__dirname, 'public'))); // Middleware para servir archivos estáticos
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Configurar el motor de plantillas EJS
+app.use(session({
+  secret: 'mysecret', // Cambia esto por una cadena secreta segura en producción
+  resave: false,
+  saveUninitialized: true,
+}));
+
 app.set('view engine', 'ejs');
 
-
-//imagenes
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Rutas
 const inmobiliariaRouter = require('./routes/inmobiliaria');
 const createRouter = require('./routes/create');
 const listRouter = require('./routes/list');
+const authRouter = require('./routes/auth');
 
 app.use('/inmobiliaria', inmobiliariaRouter);
 app.use('/create', createRouter);
 app.use('/list', listRouter);
+app.use('/auth', authRouter);
 
 app.get('/', (req, res) => {
   res.send('¡Hola Mundo!');
+});
+
+// Ruta para el formulario de inicio de sesión
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Ruta para el formulario de registro
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 app.listen(PORT, () => {

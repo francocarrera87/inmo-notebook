@@ -183,7 +183,7 @@
 
         .property-image {
             width: 150px;
-            height: 150px;
+            height: 100px;
             object-fit: cover;
             border-radius: 8px;
             flex-shrink: 0;
@@ -548,18 +548,18 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        let properties = [];
-        let currentPage = 1;
-        const itemsPerPage = 5;
-
         document.addEventListener("DOMContentLoaded", function () {
             fetchProperties();
             document.getElementById("propertyForm").addEventListener("submit", handleSubmit);
         });
 
+        let properties = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
         async function fetchProperties() {
             try {
-                const response = await fetch("http://localhost:3000/inmobiliaria");
+                const response = await fetch("/inmobiliaria");
                 properties = await response.json();
                 displayProperties(properties, currentPage);
                 updatePagination();
@@ -583,8 +583,8 @@
                         <div class="property-details">
                             <strong>${property.nombre}</strong> - ${property.modo === 'venta' ? '<span class="mode-venta">Venta</span>' : '<span class="mode-alquiler">Alquiler</span>'} - $${property.precio} ${property.moneda}
                             <p>${property.descripcion}</p>
-                            <p>Metros Totales: ${property.metrosTotales}</p> <!-- Mostrar el nuevo campo -->
-                            <p>Ciudad: ${property.ciudad}</p> <!-- Mostrar el nuevo campo -->
+                            <p>Metros Totales: ${property.metrosTotales}</p>
+                            <p>Ciudad: ${property.ciudad}</p>
                             <div class="property-actions">
                                 <button onclick="editProperty('${property._id}')">Editar</button>
                                 <button class="delete-button" onclick="confirmDeleteProperty('${property._id}')">Eliminar</button>
@@ -611,7 +611,7 @@
 
         async function editProperty(id) {
             try {
-                const response = await fetch(`http://localhost:3000/inmobiliaria/${id}`);
+                const response = await fetch(`/inmobiliaria/${id}`);
                 const property = await response.json();
 
                 document.getElementById("nombre").value = property.nombre;
@@ -626,8 +626,8 @@
                 document.getElementById("habitaciones").value = property.habitaciones;
                 document.getElementById("garajes").value = property.garajes;
                 document.getElementById("pisos").value = property.pisos;
-                document.getElementById("metrosTotales").value = property.metrosTotales; // Nuevo campo
-                document.getElementById("ciudad").value = property.ciudad; // Nuevo campo
+                document.getElementById("metrosTotales").value = property.metrosTotales;
+                document.getElementById("ciudad").value = property.ciudad;
 
                 document.getElementById("propertyForm").dataset.id = property._id;
                 document.getElementById("submitBtn").value = "Actualizar Propiedad";
@@ -643,7 +643,7 @@
 
         async function deleteProperty(id) {
             try {
-                const response = await fetch(`http://localhost:3000/inmobiliaria/${id}`, { method: "DELETE" });
+                const response = await fetch(`/inmobiliaria/${id}`, { method: "DELETE" });
                 if (response.ok) {
                     showNotification("Propiedad eliminada.", "success");
                     fetchProperties();
@@ -672,7 +672,7 @@
             const id = form.dataset.id;
 
             const formData = new FormData(form);
-            const url = id ? `http://localhost:3000/inmobiliaria/${id}` : "http://localhost:3000/inmobiliaria";
+            const url = id ? `/inmobiliaria/${id}` : "/inmobiliaria";
             const method = id ? "PUT" : "POST";
 
             try {

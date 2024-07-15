@@ -2,13 +2,26 @@ const express = require('express');
 const router = express.Router();
 const Inmobiliaria = require('../models/inmobiliaria');
 const multer = require('multer');
+const path = require('path');
 const upload = multer({ dest: 'uploads/' }); // Puedes configurar la ubicación y el nombre de archivo según sea necesario
+
+// Middleware para asegurar que el usuario esté autenticado
+const ensureAuthenticated = (req, res, next) => {
+  if (req.session.userId) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Usuario no autenticado' });
+  }
+};
+
+// Aplicar middleware de autenticación a todas las rutas
+router.use(ensureAuthenticated);
 
 // Crear un nuevo elemento inmobiliario
 router.post('/', upload.array('imagenes', 10), async (req, res) => {
   try {
     const { nombre, modo, precio, moneda, descripcion, banos, habitaciones, metrosCuadrados, garajes, pisos, metrosTotales, ciudad } = req.body;
-    const imagenes = req.files.map(file => file.path); // Guardar las rutas de las imágenes
+    const imagenes = req.files.map(file => path.join('/uploads', file.filename)); // Guardar las rutas de las imágenes
 
     const nuevoElemento = new Inmobiliaria({
       nombre,
@@ -21,9 +34,10 @@ router.post('/', upload.array('imagenes', 10), async (req, res) => {
       metrosCuadrados,
       garajes,
       pisos,
-      metrosTotales, // Nuevo campo
-      ciudad, // Nuevo campo
-      imagenes
+      metrosTotales,
+      ciudad,
+      imagenes,
+      userId: req.session.userId // Asociar propiedad con el usuario logueado
     });
 
     const resultado = await nuevoElemento.save();
@@ -33,10 +47,10 @@ router.post('/', upload.array('imagenes', 10), async (req, res) => {
   }
 });
 
-// Obtener todos los elementos inmobiliarios
+// Obtener todos los elementos inmobiliarios del usuario autenticado
 router.get('/', async (req, res) => {
   try {
-    const elementos = await Inmobiliaria.find();
+    const elementos = await Inmobiliaria.find({ userId: req.session.userId });
     res.json(elementos);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -46,8 +60,8 @@ router.get('/', async (req, res) => {
 // Obtener un elemento inmobiliario por ID
 router.get('/:id', async (req, res) => {
   try {
-    const elemento = await Inmobiliaria.findById(req.params.id);
-    if (elemento == null) {
+    const elemento = await Inmobiliaria.findOne({ _id: req.params.id, userId: req.session.userId });
+    if (!elemento) {
       return res.status(404).json({ message: 'Elemento no encontrado' });
     }
     res.json(elemento);
@@ -71,18 +85,17 @@ router.put('/:id', upload.array('imagenes', 10), async (req, res) => {
       metrosCuadrados,
       garajes,
       pisos,
-      metrosTotales, // Nuevo campo
-      ciudad // Nuevo campo
+      metrosTotales,
+      ciudad
     };
 
-    // Si hay nuevas imágenes, actualizar las rutas de las imágenes
     if (req.files && req.files.length > 0) {
-      const imagenes = req.files.map(file => file.path);
+      const imagenes = req.files.map(file => path.join('/uploads', file.filename));
       updateData.imagenes = imagenes;
     }
 
-    const elemento = await Inmobiliaria.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (elemento == null) {
+    const elemento = await Inmobiliaria.findOneAndUpdate({ _id: req.params.id, userId: req.session.userId }, updateData, { new: true });
+    if (!elemento) {
       return res.status(404).json({ message: 'Elemento no encontrado' });
     }
     res.json(elemento);
@@ -94,8 +107,8 @@ router.put('/:id', upload.array('imagenes', 10), async (req, res) => {
 // Eliminar un elemento inmobiliario por ID
 router.delete('/:id', async (req, res) => {
   try {
-    const elemento = await Inmobiliaria.findByIdAndDelete(req.params.id);
-    if (elemento == null) {
+    const elemento = await Inmobiliaria.findOneAndDelete({ _id: req.params.id, userId: req.session.userId });
+    if (!elemento) {
       return res.status(404).json({ message: 'Elemento no encontrado' });
     }
     res.json({ message: 'Elemento eliminado' });
